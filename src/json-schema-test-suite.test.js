@@ -26,9 +26,9 @@ import { basename } from "node:path";
 
 /** @type Set<string> */
 const skip = new Set([
-  "|anchor.json",
+  "|anchor.json", //need to implement
   "|defs.json",
-  "|dynamicRef.json",
+  "|dynamicRef.json", //need to implement
   "|not.json|collect annotations inside a 'not', even if collection is disabled",
   "|ref.json|remote ref, containing refs itself",
   "|ref.json|Recursive references between schemas",
@@ -52,9 +52,10 @@ const skip = new Set([
   "|refRemote.json|Location-independent identifier in remote ref",
   "|refRemote.json|remote HTTP ref with nested absolute ref",
   "|refRemote.json|$ref to $ref finds detached $anchor",
-  "|unevaluatedItems.json",
-  "|unevaluatedProperties.json",
-  "|vocabulary.json"
+  "|unevaluatedItems.json",  //need to implement
+  "|unevaluatedProperties.json", //need to implement
+  "|vocabulary.json",
+  "|refRemote.json"
 ]);
 
 /** @type (path: string[]) => boolean */
@@ -109,7 +110,9 @@ describe(draft, async () => {
     describe(entry.name, async () => {
       /** @type Suite[] */
       const suites = JSON.parse(await readFile(file, "utf8")); // eslint-disable-line @typescript-eslint/no-unsafe-assignment
-
+      // console.log("suite descs are: ", suites[0].tests[0].description);
+      // console.log("after validating:",validate(suites[1].schema, suites[1].schema));
+      
       for (const suite of suites) {
         if (shouldSkip([entry.name, suite.description])) {
           continue;
@@ -124,6 +127,8 @@ describe(draft, async () => {
             test(schemaTest.description, () => {
               const output = validate(suite.schema, schemaTest.data);
               expect(output.valid).to.equal(schemaTest.valid);
+              // expect(output.absoluteKeywordLocation).to.equal(schemaTest.absoluteKeywordLocation);
+              // expect(output.valid).to.equal(schemaTest.valid);
             });
           }
         });

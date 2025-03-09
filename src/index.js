@@ -39,8 +39,9 @@ export const validate = (schema, instance) => {
     }
   }
 
-  const output = validateSchema(schemaNode, toJsonNode(instance));
-
+  const output = validateSchema(schemaNode, toJsonNode(instance, uri));
+  console.log("json pointer is: ", JsonPointer);
+  
   schemaRegistry.delete(uri);
 
   return output;
@@ -54,6 +55,7 @@ const validateSchema = (schemaNode, instanceNode) => {
         return new Output(schemaNode.value, schemaNode, instanceNode);
       case "object":
         let isValid = true;
+        const errors = [];
         for (const propertyNode of schemaNode.children) {
           const [keywordNode, keywordValueNode] = propertyNode.children;
           const keywordHandler = keywordHandlers.get(keywordNode.value);
@@ -61,11 +63,12 @@ const validateSchema = (schemaNode, instanceNode) => {
             const keywordOutput = keywordHandler(keywordValueNode, instanceNode, schemaNode);
             if (!keywordOutput.valid) {
               isValid = false;
+              errors.push (keywordOutput);
             }
           }
-        }
-
-        return new Output(isValid, schemaNode, instanceNode);
+        }        
+        if ( errors.length === 0) return new Output(isValid, schemaNode, instanceNode, errors);
+        return new Output(isValid, schemaNode, instanceNode) ;
     }
   }
 
@@ -74,7 +77,6 @@ const validateSchema = (schemaNode, instanceNode) => {
 
 /** @type Map<string, JsonNode> */
 const schemaRegistry = new Map();
-
 /** @type (schema: Json, uri: string) => void */
 export const registerSchema = (schema, uri) => {
   schemaRegistry.set(uri, toJsonNode(schema, uri));
@@ -556,6 +558,8 @@ keywordHandlers.set("multipleOf", (multipleOfNode, instanceNode) => {
   const isValid = numberEqual(0, remainder) || numberEqual(multipleOfNode.value, remainder);
   return new Output(isValid, multipleOfNode, instanceNode);
 });
+
+// Here I need to implement the embedded schemas and all the implementation tasks
 
 /** @type (a: number, b: number) => boolean */
 const numberEqual = (a, b) => Math.abs(a - b) < 1.19209290e-7;

@@ -18,7 +18,11 @@ import * as JsonPointer from "@hyperjump/json-pointer";
 
 
 /** @type (json: Json, uri?: string, pointer?: string) => JsonNode */
-export const toJsonNode = (json, uri = "", pointer = "") => {
+export const toJsonNode = (json, uri, pointer) => {
+  pointer = pointer || " ";
+  // need to implement the pointer here.
+  // console.log("this is type from the file jsoaast-uitl.js: ",{ type: "json", jsonType: "boolean", value: json, location: `${uri}#${pointer}` });
+  
   switch (typeof json) {
     case "boolean":
       return { type: "json", jsonType: "boolean", value: json, location: `${uri}#${pointer}` };
